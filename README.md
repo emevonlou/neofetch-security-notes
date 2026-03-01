@@ -1,77 +1,87 @@
-# Neofetch & System Metadata Exposure  
-### A Defensive Perspective on Local Fingerprinting
+# System Metadata Exposure & Defensive Sanitization Toolkit
 
-Neofetch is widely used to display system information in a visually appealing format.  
-From a security standpoint, however, it can also be understood as a compact aggregation of local system metadata.
+This project started with a simple moment of curiosity.
 
-This repository analyzes Neofetch output from a defensive perspective, focusing on metadata exposure, fingerprinting risks, and operational security (OPSEC) awareness.
+While using **Neofetch**, I realized something that stayed with me.
 
+Neofetch displays system information in a beautiful, almost aesthetic way.  
+It feels harmless. Just specs. Just details.
 
-## Why This Matters
+But I began to wonder:
 
-Individually, most system information fields appear harmless.
+What happens when those details are shared publicly?
 
-When combined, they can form a technical fingerprint that may contribute to:
+What happens when small pieces of metadata...a hostname, a kernel version, a shell, a memory footprint...start accumulating across posts, platforms, and conversations?
 
-- Targeted vulnerability research (e.g., kernel-specific CVEs)
-- Environment inference (virtualized vs physical systems)
-- Stack-specific attack modeling
-- Identity or infrastructure correlation across platforms
-- Improved social engineering precision
+Individually, they seem insignificant.
 
-The risk is rarely in a single data point — it is in aggregation.
+Together, they can form a fingerprint.
 
+This repository was born from that reflection.
 
-## What Neofetch Typically Reveals
+The name includes “neofetch” because that is where the idea began.  
+But this project is not about a single tool.
 
-Neofetch commonly aggregates:
+It is about awareness.  
+It is about understanding metadata exposure.  
+It is about thinking before sharing.
 
-- Operating system and distribution
-- Kernel version
-- Hostname
-- Shell
-- Desktop environment / window manager
-- CPU and GPU model
-- Memory usage
-- Uptime
-- Package counts
-- Display resolution
-
-The exposure level depends not only on the tool, but on how and where the information is shared.
+The principles and tools here apply to any situation where system information, logs, terminal output, or diagnostic reports are shared publicly.
 
 
-## Defensive Disclosure Principles
+## Why I Care About This
 
-When sharing system information publicly:
+In security, we often focus on big vulnerabilities.
 
-- Share only what is necessary.
-- Generalize versions when possible (e.g., `6.x` instead of full kernel string).
-- Redact hostnames and identifiable naming conventions.
-- Avoid exposing serials, UUIDs, MAC addresses, IP addresses, or usernames.
-- Consider correlation risk across multiple platforms.
+But exposure is sometimes quieter.
 
-Minimalism reduces surface area.
+It happens slowly.
+It happens through aggregation.
+It happens through details we did not think mattered.
 
+A single field is rarely dangerous.
 
-## Operational Security Considerations
+Aggregation is.
 
-Security-conscious practitioners should consider:
-
-- Whether detailed system output is required at all.
-- The context in which information is being disclosed.
-- The cumulative metadata footprint created over time.
-- How small disclosures may combine into identifiable patterns.
-
-In many cases, omitting detailed system output is the most secure approach.
+This repository explores that boundary between convenience and caution.
 
 
-## Scope
+## What You Will Find Here
 
-This repository does not provide offensive guidance.  
-It exists to promote defensive awareness and responsible disclosure practices.
+- A defensive threat model for system metadata exposure  
+- Practical guidelines for responsible disclosure  
+- Lightweight sanitization tools  
+- Pattern detection helpers to flag potentially sensitive information  
+- A mindset focused on reducing correlation surface  
+
+The tools included here are intentionally simple.
+
+They are not designed to hide everything.
+They are designed to encourage pause and awareness before publishing technical output.
+
+They can be used to sanitize:
+
+- Neofetch output  
+- Terminal captures  
+- Debug logs  
+- Configuration snippets  
+- Any text containing system metadata  
 
 
-## Disclaimer
+## Core Principle
 
-All content is provided for educational and defensive purposes only.  
-Do not perform fingerprinting or reconnaissance activities on systems without explicit authorization.
+Share only what is necessary.  
+Generalize when possible.  
+Redact identifiable elements.  
+Reduce long-term correlation risk.
+
+Security is not only about defense against attacks.
+
+It is also about mindful disclosure.
+
+
+## Final Note
+
+This repository exists to promote defensive thinking and responsible sharing.
+
+Do not perform fingerprinting or reconnaissance against systems without explicit authorization.
