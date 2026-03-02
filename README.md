@@ -79,6 +79,19 @@ Security is not only about defense against attacks.
 
 It is also about mindful disclosure.
 
+## Security by Design Principles
+
+This toolkit is intentionally defensive and built around security-by-design ideas:
+
+- **Data minimization:** sanitize and generalize metadata before sharing. If a detail is not needed, it should not be disclosed.
+- **Secure defaults:** the safer workflow should be the easiest one (e.g., strict sanitization and explicit reminders to review output).
+- **Defense in depth:** combine multiple layers (sanitization + red-flag scanning + commit-time guardrails) rather than relying on a single step.
+- **Fail-safe behavior:** prefer blocking unsafe actions (e.g., preventing commits that appear to contain sensitive patterns) over silently allowing them.
+- **User control and transparency:** tools operate locally, do not auto-upload, and keep the user in control of what gets shared.
+- **Practical usability:** mitigation is only effective if people actually use it—so the tools are small, simple, and easy to integrate into daily workflows.
+
+The goal is not to “hide everything”, but to reduce unnecessary exposure and long-term correlation risk.
+
 
 ## Final Note
 
