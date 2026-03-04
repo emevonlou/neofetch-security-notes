@@ -1,0 +1,10 @@
+# temporary files
+*.tmp
+*.log
+
+# editor
+*~
+*.swp
+
+# generated outputs
+sanitized-*.txt

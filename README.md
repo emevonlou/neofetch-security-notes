@@ -28,6 +28,21 @@ It is about thinking before sharing.
 
 The principles and tools here apply to any situation where system information, logs, terminal output, or diagnostic reports are shared publicly.
 
+## Quick Start
+
+Generate sanitized output before sharing system information:
+
+```bash
+neofetch | ./tools/sanitize-neofetch.sh --strict
+```
+
+- Optional: scan the output for potential sensitive patterns.
+
+```bash
+neofetch | ./tools/sanitize-neofetch.sh --strict | ./tools/redflag-scan.sh
+```
+
+This helps reduce accidental exposure of system metadata such as hostnames, paths, or identifiers.
 
 ## Why I Care About This
 
