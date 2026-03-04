@@ -1,10 +1,5 @@
-# temporary files
-*.tmp
+# generated outputs / local artifacts
+sanitized*.txt
+*.out
 *.log
-
-# editor
-*~
-*.swp
-
-# generated outputs
-sanitized-*.txt
+/tmp/*

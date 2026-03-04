@@ -44,6 +44,12 @@ neofetch | ./tools/sanitize-neofetch.sh --strict | ./tools/redflag-scan.sh
 
 This helps reduce accidental exposure of system metadata such as hostnames, paths, or identifiers.
 
+## Optional: Install pre-commit hook
+
+```bash
+ln -sf ../../hooks/pre-commit .git/hooks/pre-commit
+```
+
 ## Why I Care About This
 
 In security, we often focus on big vulnerabilities.

@@ -1,0 +1,38 @@
+name: redflag-scan
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Make tools executable
+        run: |
+          chmod +x tools/redflag-scan.sh || true
+
+      - name: Scan repository files for red flags
+        run: |
+          # Scan only text-like files (avoid binaries)
+          # Fail build if matches are found.
+          found=0
+          while IFS= read -r f; do
+            # Skip .gitignore patterns if needed (optional later)
+            if ./tools/redflag-scan.sh --fail "$f" >/dev/null 2>&1; then
+              : # no matches
+            else
+              code=$?
+              if [ "$code" -eq 2 ]; then
+                echo "[match] $f"
+                ./tools/redflag-scan.sh "$f" || true
+                found=1
+              fi
+            fi
+          done < <(git ls-files | grep -E '\.(md|txt|sh|yml|yaml|json)$')
+          if [ "$found" -eq 1 ]; then
+            echo "Red flags detected. Please sanitize/redact before merging."
+            exit 1
+          fi
