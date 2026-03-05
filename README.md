@@ -1,5 +1,10 @@
 # System Metadata Exposure & Defensive Sanitization Toolkit
 
+![License](https://img.shields.io/badge/license-MIT-green)
+![Shell](https://img.shields.io/badge/language-bash-blue)
+![Security Focus](https://img.shields.io/badge/focus-metadata%20security-purple)
+![Status](https://img.shields.io/badge/status-active-success)
+
 This project started with a simple moment of curiosity.
 
 While using **Neofetch**, I realized something that stayed with me.
@@ -43,6 +48,13 @@ neofetch | ./tools/sanitize-neofetch.sh --strict | ./tools/redflag-scan.sh
 ```
 
 This helps reduce accidental exposure of system metadata such as hostnames, paths, or identifiers.
+
+## Tools
+
+- `tools/sanitize-neofetch.sh` — best-effort sanitizer (supports `--strict`)
+- `tools/redflag-scan.sh` — flags common sensitive patterns (best-effort)
+- `hooks/pre-commit` — portable pre-commit hook you can install locally
+- `.github/workflows/` — CI checks to help prevent accidental sensitive-data commits
 
 ## Optional: Install pre-commit hook
 
@@ -99,6 +111,29 @@ Reduce long-term correlation risk.
 Security is not only about defense against attacks.
 
 It is also about mindful disclosure.
+
+## Security Model
+
+This toolkit operates with a strict local-only philosophy.
+
+All analysis and sanitization happen directly on the user's machine.
+The tools do not collect, transmit, or store system data externally.
+
+The repository focuses on reducing **accidental metadata exposure** when developers share:
+
+- terminal output
+- system diagnostics
+- debugging logs
+- configuration snippets
+
+Pattern detection and sanitization provided here are **best-effort heuristics**.
+
+They are designed to highlight potentially sensitive elements such as identifiers,
+paths, addresses, or unique system metadata that may contribute to fingerprinting.
+
+However, no automated tool can guarantee complete sanitization.
+
+Users should always manually review output before publishing or sharing it publicly.
 
 ## Security by Design Principles
 
