@@ -55,6 +55,15 @@ This helps reduce accidental exposure of system metadata such as hostnames, path
 - `tools/redflag-scan.sh` — flags common sensitive patterns (best-effort)
 - `hooks/pre-commit` — portable pre-commit hook you can install locally
 - `.github/workflows/` — CI checks to help prevent accidental sensitive-data commits
+- `tools/safe-share.sh` — simple wrapper that combines sanitization and scanning workflows
+
+### Example workflow
+
+```bash
+neofetch | ./tools/safe-share.sh sanitize | tee sanitized.txt | ./tools/safe-share.sh scan
+```
+This workflow sanitizes system output and immediately scans it for
+potentially sensitive metadata before sharing.
 
 ## Optional: Install pre-commit hook
 
