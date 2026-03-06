@@ -5,11 +5,11 @@
 \b([0-9]{1,3}\.){3}[0-9]{1,3}\b
 
 # Common user paths (Linux/macOS + mounts)
-\/(home|Users|mnt|media)\/[^\/[:space:]]+
+/(home|Users|mnt|media)/[^/[:space:]]+
 
 # Common identifiers
 \bUUID\b
 \bSerial\b
 \bMachine[- ]?ID\b
 \bmachine[- ]?id\b
-\/etc\/machine-id
+/etc/machine-id
