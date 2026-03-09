@@ -36,7 +36,7 @@ printf "Host: demo-host\nKernel: 6.8.1-demo\nMemory: 4GiB / 16GiB\n" \
   | ./tools/sanitize-neofetch.sh --strict >/dev/null
 
 echo "[4/4] testing safe-share workflow"
-printf "IP 192.168.0.10\nPath /home/demo/x\n" \
+printf "Example value one\nExample value two\n" \
   | ./tools/safe-share.sh sanitize \
   | ./tools/safe-share.sh scan >/dev/null
 
