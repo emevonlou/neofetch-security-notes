@@ -51,11 +51,11 @@ This helps reduce accidental exposure of system metadata such as hostnames, path
 
 ## Tools
 
-- `tools/sanitize-neofetch.sh` — best-effort sanitizer (supports `--strict`)
-- `tools/redflag-scan.sh` — flags common sensitive patterns (best-effort)
-- `hooks/pre-commit` — portable pre-commit hook you can install locally
-- `.github/workflows/` — CI checks to help prevent accidental sensitive-data commits
-- `tools/safe-share.sh` — simple wrapper that combines sanitization and scanning workflows
+| Tool | Description |
+|-----|-------------|
+| `tools/sanitize-neofetch.sh` | Sanitizes system metadata before sharing |
+| `tools/redflag-scan.sh` | Detects potentially sensitive patterns such as IPs, MAC addresses, paths, and identifiers |
+| `tools/safe-share.sh` | Wrapper that combines sanitization and scanning workflows |
 
 ### Example workflow
 
