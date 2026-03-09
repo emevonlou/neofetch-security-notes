@@ -107,6 +107,12 @@ This toolkit is intentionally defensive and built around security-by-design idea
 
 The goal is not to “hide everything”, but to reduce unnecessary exposure and long-term correlation risk.
 
+## Documentation
+
+Additional explanations and background material are available in the `docs/` directory:
+
+- `docs/metadata-exposure.md` — discussion of metadata exposure and defensive awareness
+- `docs/fingerprinting-risk.md` — explanation of how system metadata can contribute to system fingerprinting
 
 ## Final Note
 
