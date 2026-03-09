@@ -1,0 +1,22 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  defensive-checks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Ensure scripts are executable
+        run: |
+          chmod +x tools/*.sh || true
+          chmod +x hooks/pre-commit || true
+
+      - name: Run local defensive checks
+        run: |
+          ./tools/run-checks.sh

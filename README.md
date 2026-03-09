@@ -71,6 +71,20 @@ potentially sensitive metadata before sharing.
 ln -sf ../../hooks/pre-commit .git/hooks/pre-commit
 ```
 
+## Local Automation
+
+Install the portable pre-commit hook:
+
+```bash
+./tools/install-hooks.sh
+```
+
+Run the local verification pipeline:
+
+```bash
+./tools/run-checks.sh
+```
+
 ## Security Model
 
 This toolkit operates with a strict local-only philosophy.
@@ -106,6 +120,34 @@ This toolkit is intentionally defensive and built around security-by-design idea
 - **Practical usability:** mitigation is only effective if people actually use it...so the tools are small, simple, and easy to integrate into daily workflows.
 
 The goal is not to “hide everything”, but to reduce unnecessary exposure and long-term correlation risk.
+
+## Project Structure
+
+```text
+.
+├── .github/workflows/     # CI automation
+├── docs/                  # extended documentation
+├── hooks/                 # portable git hooks
+├── tools/                 # defensive scripts
+│   ├── patterns/          # red-flag regex patterns
+│   ├── redflag-scan.sh
+│   ├── sanitize-neofetch.sh
+│   ├── safe-share.sh
+│   └── make-sanitized-report.sh
+├── CONTRIBUTING.md
+├── SECURITY.md
+└── README.md
+
+## Automation
+
+This project includes lightweight automation for safer workflows:
+
+- local pre-commit protection
+- repository scanning for common red flags
+- GitHub Actions for continuous verification
+- reusable local checks through `tools/run-checks.sh`
+
+The goal is to keep the toolkit small, auditable, and practical.
 
 ## Documentation
 
