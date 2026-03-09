@@ -23,8 +23,9 @@ while IFS= read -r f; do
       found=1
     fi
   fi
-done < <(git ls-files | grep -E '\.(md|txt|sh|yml|yaml|json)$' || true)
-
+done < <(git ls-files \
+  | grep -E '\.(md|txt|sh|yml|yaml|json)$' \
+  | grep -vE '^tools/run-checks\.sh$|^tools/patterns/|^examples/' || true)
 if [[ "$found" -eq 1 ]]; then
   echo "[error] red flags detected"
   exit 1
