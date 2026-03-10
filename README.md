@@ -1,163 +1,176 @@
-# System Metadata Exposure & Defensive Sanitization Toolkit
+# neofetch-security-notes
 
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Shell](https://img.shields.io/badge/language-bash-blue)
 ![Security Focus](https://img.shields.io/badge/focus-metadata%20security-purple)
 ![Status](https://img.shields.io/badge/status-active-success)
 
-This project started with a simple moment of curiosity.
+Lightweight defensive tooling for reducing accidental metadata exposure in shared system outputs and repositories.
 
-While using **Neofetch**, I realized something that stayed with me.
+This project provides a small toolkit for sanitizing terminal output and scanning repository files for patterns that may reveal environment-specific or sensitive information before publication.
 
-Neofetch displays system information in a beautiful, almost aesthetic way.  
-It feels harmless. Just specs. Just details.
+---
 
-But I began to wonder:
+## Demo
 
-What happens when those details are shared publicly?
+![Quick demo](docs/demo/quickstart.gif)
 
-What happens when small pieces of metadata...a hostname, a kernel version, a shell, a memory footprint...start accumulating across posts, platforms, and conversations?
+Example workflow showing sanitization and optional disclosure scanning before sharing system output.
 
-Individually, they seem insignificant.
+# Why this project exists
 
-Together, they can form a fingerprint.
+Developers frequently share terminal output, configuration notes, screenshots, or debugging information without realizing how much environment-specific metadata they expose.
 
-This repository was born from that reflection.
+Examples include:
 
-The name includes “neofetch” because that is where the idea began.  
-But this project is not about a single tool.
+- hostnames
+- local filesystem paths
+- internal IP addresses
+- user identifiers
+- environment fingerprints
 
-It is about awareness.  
-It is about understanding metadata exposure.  
-It is about thinking before sharing.
+This toolkit provides simple guardrails to reduce accidental disclosure before content is shared publicly.
 
-The principles and tools here apply to any situation where system information, logs, terminal output, or diagnostic reports are shared publicly.
+---
 
-## Quick Start
+# Quick Start
 
-Generate sanitized output before sharing system information:
+Generate sanitized system output before sharing:
 
 ```bash
 neofetch | ./tools/sanitize-neofetch.sh --strict
 ```
 
-- Optional: scan the output for potential sensitive patterns.
+Optionally scan the sanitized output for risky disclosure patterns:
 
 ```bash
 neofetch | ./tools/sanitize-neofetch.sh --strict | ./tools/redflag-scan.sh
 ```
 
-This helps reduce accidental exposure of system metadata such as hostnames, paths, or identifiers.
+This helps reduce exposure of hostnames, paths, identifiers, and other environment-specific details.
 
-## Tools
+---
 
-| Tool | Description |
-|-----|-------------|
-| `tools/sanitize-neofetch.sh` | Sanitizes system metadata before sharing |
-| `tools/redflag-scan.sh` | Detects potentially sensitive patterns such as IPs, MAC addresses, paths, and identifiers |
-| `tools/safe-share.sh` | Wrapper that combines sanitization and scanning workflows |
+# Toolkit Components
 
-### Example workflow
+The repository includes several small defensive utilities.
 
-```bash
-neofetch | ./tools/safe-share.sh sanitize | tee sanitized.txt | ./tools/safe-share.sh scan
+### sanitize-neofetch
+
+Sanitizes system output to remove or redact metadata that could reveal host or environment details.
+
 ```
-This workflow sanitizes system output and immediately scans it for
-potentially sensitive metadata before sharing.
-
-## Optional: Install pre-commit hook
-
-```bash
-ln -sf ../../hooks/pre-commit .git/hooks/pre-commit
+tools/sanitize-neofetch.sh
 ```
 
-## Local Automation
-
-Install the portable pre-commit hook:
+Typical usage:
 
 ```bash
-./tools/install-hooks.sh
+neofetch | ./tools/sanitize-neofetch.sh --strict
 ```
 
-Run the local verification pipeline:
+---
+
+### redflag-scan
+
+Scans files or streams for patterns that may indicate accidental disclosure.
+
+```
+tools/redflag-scan.sh
+```
+
+Example:
 
 ```bash
-./tools/run-checks.sh
+cat report.txt | ./tools/redflag-scan.sh
 ```
 
-## Security Model
+---
 
-This toolkit operates with a strict local-only philosophy.
+### safe-share
 
-All analysis and sanitization happen directly on the user's machine.
-The tools do not collect, transmit, or store system data externally.
+Pipeline helper combining sanitization and scanning.
 
-The repository focuses on reducing **accidental metadata exposure** when developers share:
+```
+tools/safe-share.sh
+```
 
-- terminal output
-- system diagnostics
-- debugging logs
-- configuration snippets
+Example workflow:
 
-Pattern detection and sanitization provided here are **best-effort heuristics**.
+```bash
+neofetch | ./tools/safe-share.sh sanitize | ./tools/safe-share.sh scan
+```
 
-They are designed to highlight potentially sensitive elements such as identifiers,
-paths, addresses, or unique system metadata that may contribute to fingerprinting.
+---
 
-However, no automated tool can guarantee complete sanitization.
+# Development Workflow
 
-Users should always manually review output before publishing or sharing it publicly.
+This project includes local and CI guardrails.
 
-## Security by Design Principles
+### Local checks
 
-This toolkit is intentionally defensive and built around security-by-design ideas:
+Run defensive checks locally before committing:
 
-- **Data minimization:** sanitize and generalize metadata before sharing. If a detail is not needed, it should not be disclosed.
-- **Secure defaults:** the safer workflow should be the easiest one (e.g., strict sanitization and explicit reminders to review output).
-- **Defense in depth:** combine multiple layers (sanitization + red-flag scanning + commit-time guardrails) rather than relying on a single step.
-- **Fail-safe behavior:** prefer blocking unsafe actions (e.g., preventing commits that appear to contain sensitive patterns) over silently allowing them.
-- **User control and transparency:** tools operate locally, do not auto-upload, and keep the user in control of what gets shared.
-- **Practical usability:** mitigation is only effective if people actually use it...so the tools are small, simple, and easy to integrate into daily workflows.
+```bash
+make check
+```
 
-The goal is not to “hide everything”, but to reduce unnecessary exposure and long-term correlation risk.
+### Install commit hooks
 
-## Project Structure
+```bash
+make hooks
+```
 
-```text
-.
-├── .github/workflows/     # CI automation
-├── docs/                  # extended documentation
-├── hooks/                 # portable git hooks
-├── tools/                 # defensive scripts
-│   ├── patterns/          # red-flag regex patterns
-│   ├── redflag-scan.sh
-│   ├── sanitize-neofetch.sh
-│   ├── safe-share.sh
-│   └── make-sanitized-report.sh
-├── CONTRIBUTING.md
-├── SECURITY.md
-└── README.md
+The pre-commit hook scans staged changes for patterns that could expose sensitive information.
 
-## Automation
+---
 
-This project includes lightweight automation for safer workflows:
+### Continuous Integration
 
-- local pre-commit protection
-- repository scanning for common red flags
-- GitHub Actions for continuous verification
-- reusable local checks through `tools/run-checks.sh`
+GitHub Actions runs a repository scan using:
 
-The goal is to keep the toolkit small, auditable, and practical.
+```
+.github/workflows/redflag-scan.yml
+```
 
-## Documentation
+This ensures repository files do not accidentally introduce risky patterns.
 
-Additional explanations and background material are available in the `docs/` directory:
+---
 
-- `docs/metadata-exposure.md` — discussion of metadata exposure and defensive awareness
-- `docs/fingerprinting-risk.md` — explanation of how system metadata can contribute to system fingerprinting
+# Design Goals
 
-## Final Note
+The project focuses on lightweight defensive tooling.
 
-This repository exists to promote defensive thinking and responsible sharing.
+Goals include:
 
-Do not perform fingerprinting or reconnaissance against systems without explicit authorization.
+- catch obvious disclosure patterns early
+- keep tooling simple and transparent
+- support local-first developer workflows
+- reinforce checks in CI pipelines
+
+---
+
+# Security Philosophy
+
+This project focuses on **preventing accidental disclosure**, not on replacing full security tooling.
+
+It is intended as a lightweight layer of protection for developers sharing technical content publicly.
+
+---
+
+# Limitations
+
+This toolkit does **not** replace:
+
+- full secret scanning tools
+- professional security review
+- threat modeling
+- credential management systems
+
+Instead, it provides simple guardrails to reduce common mistakes when sharing system information.
+
+---
+
+# License
+
+MIT License
