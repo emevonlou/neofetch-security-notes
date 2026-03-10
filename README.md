@@ -17,7 +17,7 @@ This project provides a small toolkit for sanitizing terminal output and scannin
 
 Example workflow showing sanitization and optional disclosure scanning before sharing system output.
 
-# Why this project exists
+## What problem does this solve?
 
 Developers frequently share terminal output, configuration notes, screenshots, or debugging information without realizing how much environment-specific metadata they expose.
 
