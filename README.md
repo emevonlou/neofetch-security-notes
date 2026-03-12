@@ -180,6 +180,12 @@ Instead, it provides simple guardrails to reduce common mistakes when sharing sy
 
 ---
 
+## Security notes
+
+See [docs/security-notes.md](docs/security-notes.md) for design choices, scope, and trade-offs.
+
+---
+
 # License
 
 MIT License
