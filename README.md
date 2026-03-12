@@ -17,6 +17,15 @@ This project provides a small toolkit for sanitizing terminal output and scannin
 
 Example workflow showing sanitization and optional disclosure scanning before sharing system output.
 
+## Workflow
+
+```mermaid
+flowchart TD
+    A[System output] --> B[sanitize-neofetch.sh]
+    B --> C[redflag-scan.sh]
+    C --> D[Safe output for sharing]
+```
+
 ## What problem does this solve?
 
 Developers frequently share terminal output, configuration notes, screenshots, or debugging information without realizing how much environment-specific metadata they expose.
