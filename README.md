@@ -4,6 +4,7 @@
 ![Shell](https://img.shields.io/badge/language-bash-blue)
 ![Security Focus](https://img.shields.io/badge/focus-metadata%20security-purple)
 ![Status](https://img.shields.io/badge/status-active-success)
+![CI](https://github.com/emevonlou/neofetch-security-notes/actions/workflows/redflag-scan.yml/badge.svg)
 
 Lightweight defensive tooling for reducing accidental metadata exposure in shared system outputs and repositories.
 
