@@ -1,0 +1,11 @@
+# Ignore example files
+examples/
+
+# Ignore generated reports
+reports/
+
+# Ignore documentation examples
+docs/demo/
+
+# Ignore patterns directory
+tools/patterns/

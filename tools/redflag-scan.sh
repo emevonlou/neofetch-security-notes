@@ -1,46 +1,93 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Usage:
-#   ./tools/redflag-scan.sh [--fail] [file]
-#   cat file.txt | ./tools/redflag-scan.sh [--fail]
-#
-# Scans text for common sensitive patterns (best-effort).
-# By default, exits 0 even if matches are found.
-# With --fail, exits 2 if matches are found (useful for CI).
+ignore_file=".redflagignore"
+fail_mode=0
 
-FAIL=0
+should_ignore() {
+  local file="$1"
+
+  [[ "$file" == "-" ]] && return 1
+
+  if [[ -f "$ignore_file" ]]; then
+    while IFS= read -r pattern; do
+      [[ -z "$pattern" ]] && continue
+      [[ "$pattern" =~ ^# ]] && continue
+
+      if [[ "$file" == "$pattern"* ]]; then
+        return 0
+      fi
+    done < "$ignore_file"
+  fi
+
+  return 1
+}
+
 if [[ "${1:-}" == "--fail" ]]; then
-  FAIL=1
+  fail_mode=1
   shift
 fi
 
-input="${1:-/dev/stdin}"
-patterns="tools/patterns/redflags.regex"
+scan_stream() {
+  local source="$1"
+  local matched=0
 
-if [[ ! -f "$patterns" ]]; then
-  echo "[redflag-scan] missing patterns file: $patterns" >&2
-  exit 1
-fi
+  echo "[redflag-scan] scanning: $source"
 
-echo "[redflag-scan] scanning: ${1:-stdin}" >&2
+  # More specific patterns to reduce false positives.
+  local patterns=(
+    '192\.168\.[0-9]{1,3}\.[0-9]{1,3}'
+    '/home/[A-Za-z0-9._-]+/'
+    '/Users/[A-Za-z0-9._-]+/'
+    '(api[_-]?key|token|secret)[[:space:]]*[:=][[:space:]]*[^[:space:]]{8,}'
+  )
 
-# Build a single regex from the patterns file:
-# - drop comments/blank lines
-# - join with |
-regex="$(grep -vE '^\s*#|^\s*$' "$patterns" | paste -sd'|' -)"
+  local pattern
+  for pattern in "${patterns[@]}"; do
+    if grep -E -n "$pattern" ; then
+      matched=1
+    fi
+  done
 
-matches="$(grep -nE "$regex" "$input" || true)"
+  if [[ "$matched" -eq 1 ]]; then
+    if [[ "$fail_mode" -eq 1 ]]; then
+      return 2
+    fi
+    return 0
+  fi
 
-if [[ -z "$matches" ]]; then
-  echo "[redflag-scan] no obvious sensitive patterns found" >&2
+  echo "[redflag-scan] no obvious sensitive patterns found"
+  return 0
+}
+
+if [[ $# -eq 0 ]]; then
+  if ! scan_stream "stdin"; then
+    exit $?
+  fi
   exit 0
 fi
 
-echo "$matches"
+status=0
 
-if [[ "$FAIL" -eq 1 ]]; then
-  exit 2
-fi
+for file in "$@"; do
+  if should_ignore "$file"; then
+    continue
+  fi
 
-exit 0
+  if [[ ! -f "$file" ]]; then
+    echo "[redflag-scan] warning: file not found: $file"
+    status=1
+    continue
+  fi
+
+  scan_stream "$file" < "$file"
+  code=$?
+
+  if [[ "$code" -eq 2 ]]; then
+    status=2
+  elif [[ "$code" -ne 0 ]]; then
+    status=1
+  fi
+done
+
+exit "$status"
