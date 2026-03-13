@@ -1,0 +1,77 @@
+redflag repository report
+generated_at: 2026-03-13T11:52:36Z
+repository: neofetch-security-notes
+
+scanned_files:
+  - .github/workflows/ci.yml
+
+[.github/workflows/ci.yml]
+status: clean
+  - .github/workflows/redflag-scan.yml
+
+[.github/workflows/redflag-scan.yml]
+status: clean
+  - .github/workflows/shellcheck.yml
+
+[.github/workflows/shellcheck.yml]
+status: clean
+  - CONTRIBUTING.md
+
+[CONTRIBUTING.md]
+status: clean
+  - README.md
+
+[README.md]
+status: clean
+  - SECURITY.md
+
+[SECURITY.md]
+status: clean
+  - docs/01-threat-model.md
+
+[docs/01-threat-model.md]
+status: clean
+  - docs/02-field-risk-map.md
+
+[docs/02-field-risk-map.md]
+status: clean
+  - docs/03-safe-sharing-checklist.md
+
+[docs/03-safe-sharing-checklist.md]
+status: clean
+  - docs/04-sanitization-playbook.md
+
+[docs/04-sanitization-playbook.md]
+status: clean
+  - docs/fingerprinting-risk.md
+
+[docs/fingerprinting-risk.md]
+status: clean
+  - docs/metadata-exposure.md
+
+[docs/metadata-exposure.md]
+status: clean
+  - docs/security-notes.md
+
+[docs/security-notes.md]
+status: clean
+  - tools/install-hooks.sh
+
+[tools/install-hooks.sh]
+status: clean
+  - tools/redflag-scan.sh
+
+[tools/redflag-scan.sh]
+status: clean
+  - tools/run-checks.sh
+
+[tools/run-checks.sh]
+status: clean
+  - tools/safe-share.sh
+
+[tools/safe-share.sh]
+status: clean
+  - tools/sanitize-neofetch.sh
+
+[tools/sanitize-neofetch.sh]
+status: clean
