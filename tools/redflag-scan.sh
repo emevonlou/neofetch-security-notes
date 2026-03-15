@@ -3,6 +3,7 @@ set -euo pipefail
 
 ignore_file=".redflagignore"
 fail_mode=0
+json_mode=0
 
 should_ignore() {
   local file="$1"
@@ -23,16 +24,26 @@ should_ignore() {
   return 1
 }
 
-if [[ "${1:-}" == "--fail" ]]; then
-  fail_mode=1
-  shift
-fi
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --fail)
+      fail_mode=1
+      shift
+      ;;
+    --json)
+      json_mode=1
+      shift
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
 
 scan_stream() {
   local source="$1"
   local matched=0
-
-  echo "[redflag-scan] scanning: $source"
+  local matches=()
 
   # More specific patterns to reduce false positives.
   local patterns=(
@@ -42,12 +53,54 @@ scan_stream() {
     '(api[_-]?key|token|secret)[[:space:]]*[:=][[:space:]]*[^[:space:]]{8,}'
   )
 
+  if [[ "$json_mode" -eq 0 ]]; then
+    echo "[redflag-scan] scanning: $source"
+  fi
+
   local pattern
+  local result
+
   for pattern in "${patterns[@]}"; do
-    if grep -E -n "$pattern" ; then
+    result="$(grep -E -n "$pattern" || true)"
+    if [[ -n "$result" ]]; then
       matched=1
+      matches+=("$result")
+      if [[ "$json_mode" -eq 0 && "$fail_mode" -eq 0 ]]; then
+        printf '%s\n' "$result"
+      fi
     fi
   done
+
+  if [[ "$json_mode" -eq 1 ]]; then
+    printf '{\n'
+    printf '  "source": "%s",\n' "$source"
+    printf '  "matched": %s,\n' "$([[ "$matched" -eq 1 ]] && echo true || echo false)"
+    printf '  "matches": [\n'
+
+    local first=1
+    local escaped
+    local line
+    for line in "${matches[@]}"; do
+      while IFS= read -r escaped; do
+        [[ -z "$escaped" ]] && continue
+        if [[ "$first" -eq 0 ]]; then
+          printf ',\n'
+        fi
+        first=0
+        escaped="${escaped//\\/\\\\}"
+        escaped="${escaped//\"/\\\"}"
+        printf '    "%s"' "$escaped"
+      done <<< "$line"
+    done
+
+    printf '\n  ]\n'
+    printf '}\n'
+
+    if [[ "$matched" -eq 1 && "$fail_mode" -eq 1 ]]; then
+      return 2
+    fi
+    return 0
+  fi
 
   if [[ "$matched" -eq 1 ]]; then
     if [[ "$fail_mode" -eq 1 ]]; then
@@ -61,10 +114,8 @@ scan_stream() {
 }
 
 if [[ $# -eq 0 ]]; then
-  if ! scan_stream "stdin"; then
-    exit $?
-  fi
-  exit 0
+  scan_stream "stdin"
+  exit $?
 fi
 
 status=0
@@ -75,13 +126,17 @@ for file in "$@"; do
   fi
 
   if [[ ! -f "$file" ]]; then
-    echo "[redflag-scan] warning: file not found: $file"
+    if [[ "$json_mode" -eq 0 ]]; then
+      echo "[redflag-scan] warning: file not found: $file"
+    fi
     status=1
     continue
   fi
 
+  set +e
   scan_stream "$file" < "$file"
   code=$?
+  set -e
 
   if [[ "$code" -eq 2 ]]; then
     status=2
