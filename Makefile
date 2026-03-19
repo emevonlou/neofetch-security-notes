@@ -1,13 +1,16 @@
-.PHONY: help check hooks scan sanitize report repo-report
+.PHONY: help check hooks scan sanitize report test
+
+FILE ?= README.md
 
 help:
 	@echo "Available targets:"
-	@echo "  make help      - show this help message"
-	@echo "  make check     - run local defensive checks"
-	@echo "  make hooks     - install portable pre-commit hook"
-	@echo "  make scan      - scan repository files for red flags"
-	@echo "  make sanitize  - sanitize neofetch output"
-	@echo "  make report    - generate a sanitized report"
+	@echo "  make help        - show this help"
+	@echo "  make check       - run full local checks"
+	@echo "  make hooks       - install pre-commit hook"
+	@echo "  make scan        - scan a file (default: README.md)"
+	@echo "  make sanitize    - sanitize neofetch output"
+	@echo "  make report      - generate sanitized report"
+	@echo "  make test        - run fixture-based tests"
 
 check:
 	./tools/run-checks.sh
@@ -16,7 +19,7 @@ hooks:
 	./tools/install-hooks.sh
 
 scan:
-	./tools/redflag-scan.sh README.md || true
+	./tools/redflag-scan.sh $(FILE) || true
 
 sanitize:
 	neofetch | ./tools/sanitize-neofetch.sh --strict
@@ -24,5 +27,9 @@ sanitize:
 report:
 	./tools/make-sanitized-report.sh
 
-repo-report:
-	./tools/repo-report.sh
+test:
+	@echo "[test] checking sensitive fixture"
+	@./tools/redflag-scan.sh --fail examples/fixtures/sample-sensitive.txt >/dev/null 2>&1 || test $$? -eq 2
+	@echo "[test] checking clean fixture"
+	@./tools/redflag-scan.sh --fail examples/fixtures/sample-clean.txt >/dev/null
+	@echo "[ok] fixture-based tests passed"

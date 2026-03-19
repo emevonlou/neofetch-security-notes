@@ -1,0 +1,4 @@
+IP: 192.168.0.10
+MAC: aa:bb:cc:dd:ee:ff
+Path: /home/demo/test
+UUID: 123e4567-e89b-12d3-a456-426614174000

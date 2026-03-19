@@ -1,6 +1,3 @@
-# Ignore example files
-examples/
-
 # Ignore generated reports
 reports/
 
