@@ -25,12 +25,14 @@ while IFS= read -r f; do
   fi
 done < <(git ls-files \
   | grep -E '\.(md|txt|sh|yml|yaml|json)$' \
-  | grep -vE '^tools/run-checks\.sh$|^tools/patterns/|^examples/' || true)
+  | grep -vE '^examples/fixtures/' \
+  | grep -vE '^tools/patterns/' \
+  | grep -vE '^tools/run-checks\.sh$' || true)
+
 if [[ "$found" -eq 1 ]]; then
   echo "[error] red flags detected"
   exit 1
 fi
-
 echo "[3/4] testing sanitize-neofetch pipeline"
 printf "Host: demo-host\nKernel: 6.8.1-demo\nMemory: 4GiB / 16GiB\n" \
   | ./tools/sanitize-neofetch.sh --strict >/dev/null
