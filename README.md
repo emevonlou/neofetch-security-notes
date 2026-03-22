@@ -1,4 +1,4 @@
-# neofetch-security-notes
+# System Metadata Exposure & Defensive Sanitization Toolkit
 
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Shell](https://img.shields.io/badge/language-bash-blue)
@@ -6,10 +6,27 @@
 ![Status](https://img.shields.io/badge/status-active-success)
 ![CI](https://github.com/emevonlou/neofetch-security-notes/actions/workflows/redflag-scan.yml/badge.svg)
 
-Lightweight defensive tooling for reducing accidental metadata exposure when sharing system information.
 
-Developers frequently post terminal output, debugging logs, or system information online without realizing how much metadata it reveals.  
-This project provides simple guardrails to sanitize system output and detect potentially sensitive patterns before sharing.
+This project started from a simple realization:
+Even small pieces of technical output can unintentionally expose details about a system.
+What looks harmless at first glance can, over time, reveal patterns, environments, and identifiers.
+The goal of this repository is to provide simple, local, and defensive tools to help reduce that risk.
+
+---
+
+## Quick Start
+
+Sanitize system output before sharing:
+
+```bash
+neofetch | ./tools/sanitize-neofetch.sh --strict
+```
+
+Scan for potential red flags:
+
+```bash
+neofetch | ./tools/sanitize-neofetch.sh --strict | ./tools/redflag-scan.sh
+```
 
 ---
 
@@ -17,17 +34,22 @@ This project provides simple guardrails to sanitize system output and detect pot
 
 ![Quick demo](docs/demo/quickstart.gif)
 
-Example workflow showing sanitization and optional disclosure scanning before sharing system output.
+Example workflow showing sanitization and optional disclosure scanning before sharing technical output.
 
 ---
 
-## Workflow
+## Tools
 
-```mermaid
-flowchart TD
-    A[System output] --> B[sanitize-neofetch.sh]
-    B --> C[redflag-scan.sh]
-    C --> D[Safe output for sharing]
+| Tool | Description |
+|-----|-------------|
+| `tools/sanitize-neofetch.sh` | Sanitizes system metadata before sharing |
+| `tools/redflag-scan.sh` | Detects potentially sensitive patterns in text |
+| `tools/safe-share.sh` | Wrapper that combines sanitization and scanning workflows |
+
+### Example workflow
+
+```bash
+neofetch | ./tools/safe-share.sh sanitize | tee sanitized.txt | ./tools/safe-share.sh scan
 ```
 
 ---
@@ -40,123 +62,105 @@ Technical output can unintentionally expose environment details such as:
 - local filesystem paths  
 - internal IP addresses  
 - environment fingerprints  
+- API keys, tokens, and other secrets  
 
-Even small pieces of metadata can reveal useful information about a developer’s system or infrastructure.
-
-This project helps prevent accidental disclosure by sanitizing system output and scanning it for risky patterns before sharing.
-
----
-
-## Quick Start
-
-Generate sanitized system output before sharing:
-
-```bash
-neofetch | ./tools/sanitize-neofetch.sh --strict
-```
-
-Optionally scan the sanitized output for disclosure patterns:
-
-```bash
-neofetch | ./tools/sanitize-neofetch.sh --strict | ./tools/redflag-scan.sh
-```
+Even small pieces of metadata can reveal useful information about a system when combined.
 
 ---
 
-## Toolkit Components
+## Detection Coverage
 
-### sanitize-neofetch
+This toolkit provides best-effort detection for:
 
-Sanitizes system output by removing or replacing metadata that may reveal environment details.
-
-```bash
-tools/sanitize-neofetch.sh
-```
-
-Example:
-
-```bash
-neofetch | ./tools/sanitize-neofetch.sh --strict
-```
+- system metadata red flags  
+- filesystem paths  
+- IP and MAC addresses  
+- UUID and machine identifiers  
+- API keys and tokens  
+- private key headers  
 
 ---
 
-### redflag-scan
+## Security Model
 
-Scans text input or repository files for patterns that may indicate accidental disclosure.
+This toolkit operates with a strict local-only philosophy.
+All processing happens on the user's machine.  
+No data is collected, transmitted, or stored externally.
+The purpose is to reduce accidental exposure when sharing:
 
-```bash
-tools/redflag-scan.sh
-```
+- terminal output  
+- logs  
+- debugging information  
+- configuration snippets  
 
-Example:
-
-```bash
-cat output.txt | ./tools/redflag-scan.sh
-```
+Detection is best-effort and does not guarantee complete sanitization.  
+Manual review is always recommended.
 
 ---
 
-### safe-share
+## Security by Design Principles
 
-Pipeline helper that combines sanitization and scanning.
+- data minimization  
+- secure defaults  
+- defense in depth  
+- fail-safe behavior  
+- user control and transparency  
 
-```bash
-tools/safe-share.sh
-```
+---
 
-Example workflow:
+## Project Structure
 
-```bash
-neofetch | ./tools/safe-share.sh sanitize | ./tools/safe-share.sh scan
+```text
+.
+├── .github/workflows/     # CI automation
+├── docs/                  # extended documentation
+├── examples/              # test fixtures and examples
+├── hooks/                 # portable git hooks
+├── tools/                 # defensive scripts
+│   ├── patterns/
+│   ├── redflag-scan.sh
+│   ├── sanitize-neofetch.sh
+│   ├── safe-share.sh
+│   └── run-checks.sh
+├── CONTRIBUTING.md
+├── SECURITY.md
+├── Makefile
+└── README.md
 ```
 
 ---
 
-## Development Workflow
+## Automation
 
-### Run local checks
+This project includes lightweight automation:
+
+- pre-commit protection  
+- repository scanning for red flags  
+- GitHub Actions CI  
+- local checks via `make check`  
+
+Run locally:
 
 ```bash
 make check
+make test
 ```
-
-### Install commit hooks
-
-```bash
-make hooks
-```
-
-The pre-commit hook scans staged changes to prevent accidental disclosure before commits are created.
 
 ---
 
-### Continuous Integration
+## Documentation
 
-The repository includes an automated security check via GitHub Actions:
+Additional material is available in:
 
-```
-.github/workflows/redflag-scan.yml
-```
-
-This workflow scans repository files to detect potential disclosure patterns.
+- `docs/metadata-exposure.md`
+- `docs/fingerprinting-risk.md`
 
 ---
 
-## Security Philosophy
+## Final Note
 
-This project focuses on **preventing accidental disclosure**, not protecting stored secrets.
+This project is not about hiding everything.
 
-It is designed as a lightweight defensive layer for developers sharing system output publicly.
+It is about being intentional with what we expose.
 
----
-
-## Security Notes
-
-See [docs/security-notes.md](docs/security-notes.md) for design decisions, scope, and trade-offs.
-
----
-
-## License
-
-MIT License
+Reducing unnecessary metadata today can prevent unintended disclosure tomorrow.

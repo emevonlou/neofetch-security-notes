@@ -7,9 +7,31 @@
 # Common user paths (Linux/macOS + mounts)
 /(home|Users|mnt|media)/[^/[:space:]]+
 
-# Common identifiers
-\bUUID\b
-\bSerial\b
-\bMachine[- ]?ID\b
-\bmachine[- ]?id\b
+# UUID-like values
+\b[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\b
+
+# machine-id file path
 /etc/machine-id
+
+# machine-id assignments
+(machine[- ]?id)[[:space:]]*[:=][[:space:]]*[A-Za-z0-9-]{8,}
+
+# serial assignments
+(serial|serial number)[[:space:]]*[:=][[:space:]]*[A-Za-z0-9._-]{4,}
+# Bearer tokens
+Bearer[[:space:]]+[A-Za-z0-9._=-]{16,}
+
+# Generic secrets / tokens / api keys
+(api[_-]?key|token|secret|access[_-]?key)[[:space:]]*[:=][[:space:]]*["'"'"']?[A-Za-z0-9._=-]{8,}["'"'"']?
+
+# Private key markers
+-----BEGIN[[:space:]]+(RSA[[:space:]]+|EC[[:space:]]+|OPENSSH[[:space:]]+|DSA[[:space:]]+)?PRIVATE[[:space:]]+KEY-----
+
+# GitHub tokens (common prefixes)
+gh[pousr]_[A-Za-z0-9]{20,}
+
+# AWS access key id
+AKIA[0-9A-Z]{16}
+
+# Slack tokens
+xox[baprs]-[A-Za-z0-9-]{10,}
