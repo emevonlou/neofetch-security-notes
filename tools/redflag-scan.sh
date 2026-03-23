@@ -2,7 +2,6 @@
 set -euo pipefail
 
 ignore_file=".redflagignore"
-patterns_file="tools/patterns/redflags.regex"
 fail_mode=0
 json_mode=0
 
@@ -41,33 +40,43 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ ! -f "$patterns_file" ]]; then
-  echo "[redflag-scan] missing patterns file: $patterns_file" >&2
-  exit 1
-fi
-
-build_regex() {
-  grep -vE '^[[:space:]]*#|^[[:space:]]*$' "$patterns_file" | paste -sd'|' -
-}
-
-scan_content() {
+scan_stream() {
   local source="$1"
-  local content="$2"
   local matched=0
-  local matches
+  local matches=()
+  local content
 
-  local regex
-  regex="$(build_regex)"
+  content="$(cat)"
 
-  matches="$(printf '%s' "$content" | grep -nE "$regex" || true)"
+  local rules=(
+    'low|192\.168\.[0-9]{1,3}\.[0-9]{1,3}'
+    'medium|/home/[A-Za-z0-9._-]+/'
+    'medium|/Users/[A-Za-z0-9._-]+/'
+    'high|(api[_-]?key|token|secret)[[:space:]]*[:=][[:space:]]*[^[:space:]]{8,}'
+  )
 
   if [[ "$json_mode" -eq 0 ]]; then
     echo "[redflag-scan] scanning: $source"
   fi
 
-  if [[ -n "$matches" ]]; then
-    matched=1
-  fi
+  local rule severity pattern result line escaped first
+  for rule in "${rules[@]}"; do
+    severity="${rule%%|*}"
+    pattern="${rule#*|}"
+
+    result="$(grep -E -n "$pattern" <<< "$content" || true)"
+    if [[ -n "$result" ]]; then
+      matched=1
+
+      while IFS= read -r line; do
+        [[ -z "$line" ]] && continue
+        matches+=("$severity|$line")
+        if [[ "$json_mode" -eq 0 && "$fail_mode" -eq 0 ]]; then
+          printf '[%s] %s\n' "$severity" "$line"
+        fi
+      done <<< "$result"
+    fi
+  done
 
   if [[ "$json_mode" -eq 1 ]]; then
     printf '{\n'
@@ -75,18 +84,20 @@ scan_content() {
     printf '  "matched": %s,\n' "$([[ "$matched" -eq 1 ]] && echo true || echo false)"
     printf '  "matches": [\n'
 
-    local first=1
-    local line
-    while IFS= read -r line; do
-      [[ -z "$line" ]] && continue
+    first=1
+    for line in "${matches[@]}"; do
+      severity="${line%%|*}"
+      escaped="${line#*|}"
+      escaped="${escaped//\\/\\\\}"
+      escaped="${escaped//\"/\\\"}"
+
       if [[ "$first" -eq 0 ]]; then
         printf ',\n'
       fi
       first=0
-      line="${line//\\/\\\\}"
-      line="${line//\"/\\\"}"
-      printf '    "%s"' "$line"
-    done <<< "$matches"
+
+      printf '    { "severity": "%s", "match": "%s" }' "$severity" "$escaped"
+    done
 
     printf '\n  ]\n'
     printf '}\n'
@@ -98,7 +109,6 @@ scan_content() {
   fi
 
   if [[ "$matched" -eq 1 ]]; then
-    printf '%s\n' "$matches"
     if [[ "$fail_mode" -eq 1 ]]; then
       return 2
     fi
@@ -110,8 +120,7 @@ scan_content() {
 }
 
 if [[ $# -eq 0 ]]; then
-  content="$(cat)"
-  scan_content "stdin" "$content"
+  scan_stream "stdin"
   exit $?
 fi
 
@@ -130,10 +139,8 @@ for file in "$@"; do
     continue
   fi
 
-  content="$(cat "$file")"
-
   set +e
-  scan_content "$file" "$content"
+  scan_stream "$file" < "$file"
   code=$?
   set -e
 
