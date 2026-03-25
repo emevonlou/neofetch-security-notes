@@ -4,6 +4,24 @@ set -euo pipefail
 ignore_file=".redflagignore"
 fail_mode=0
 json_mode=0
+min_severity="low"
+
+severity_rank() {
+  case "$1" in
+    low) echo 1 ;;
+    medium) echo 2 ;;
+    high) echo 3 ;;
+    *) echo 0 ;;
+  esac
+}
+
+should_report_severity() {
+  local sev="$1"
+  local sev_rank min_rank
+  sev_rank="$(severity_rank "$sev")"
+  min_rank="$(severity_rank "$min_severity")"
+  [[ "$sev_rank" -ge "$min_rank" ]]
+}
 
 should_ignore() {
   local file="$1"
@@ -33,6 +51,22 @@ while [[ $# -gt 0 ]]; do
     --json)
       json_mode=1
       shift
+      ;;
+    --min-severity)
+      min_severity="${2:-}"
+      if [[ -z "$min_severity" ]]; then
+        echo "[redflag-scan] error: --min-severity requires a value" >&2
+        exit 1
+      fi
+      case "$min_severity" in
+        low|medium|high)
+          ;;
+        *)
+          echo "[redflag-scan] error: invalid severity '$min_severity' (use low, medium, or high)" >&2
+          exit 1
+          ;;
+      esac
+      shift 2
       ;;
     *)
       break
@@ -64,6 +98,10 @@ scan_stream() {
     severity="${rule%%|*}"
     pattern="${rule#*|}"
 
+    if ! should_report_severity "$severity"; then
+      continue
+    fi
+
     result="$(grep -E -n "$pattern" <<< "$content" || true)"
     if [[ -n "$result" ]]; then
       matched=1
@@ -82,6 +120,7 @@ scan_stream() {
     printf '{\n'
     printf '  "source": "%s",\n' "$source"
     printf '  "matched": %s,\n' "$([[ "$matched" -eq 1 ]] && echo true || echo false)"
+    printf '  "min_severity": "%s",\n' "$min_severity"
     printf '  "matches": [\n'
 
     first=1
