@@ -28,8 +28,10 @@ report:
 	./tools/make-sanitized-report.sh
 
 test:
-	@echo "[test] checking sensitive fixture"
+	@echo "[test] checking sensitive metadata fixture"
 	@./tools/redflag-scan.sh --fail examples/fixtures/sample-sensitive.txt >/dev/null 2>&1 || test $$? -eq 2
+	@echo "[test] checking secrets fixture"
+	@./tools/redflag-scan.sh --fail examples/fixtures/sample-secrets.txt >/dev/null 2>&1 || test $$? -eq 2
 	@echo "[test] checking clean fixture"
 	@./tools/redflag-scan.sh --fail examples/fixtures/sample-clean.txt >/dev/null
 	@echo "[ok] fixture-based tests passed"

@@ -154,7 +154,8 @@ scan_stream() {
     return 0
   fi
 
-  echo "[redflag-scan] no obvious sensitive patterns found"
+  echo "[redflag-scan] no sensitive patterns detected"
+
   return 0
 }
 
