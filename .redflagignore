@@ -1,8 +1,14 @@
+# Ignore test files (contain dummy secrets)
+tests/
+
+# Ignore example fixtures
+examples/
+
+# Ignore demo content
+docs/demo/
+
 # Ignore generated reports
 reports/
 
-# Ignore documentation examples
-docs/demo/
-
-# Ignore patterns directory
+# Ignore internal pattern definitions
 tools/patterns/
